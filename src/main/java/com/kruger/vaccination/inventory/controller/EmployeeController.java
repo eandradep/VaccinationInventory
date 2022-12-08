@@ -35,9 +35,7 @@ import static com.kruger.vaccination.inventory.configuration.StaticValues.*;
 @RequestMapping("/employeeController")
 public class EmployeeController {
 
-    private Map<String, Object> response;
-    @Autowired
-    private IEmployeeService iEmployeeService;
+
     @Autowired
     private IValidationService iValidationService;
     @Autowired
