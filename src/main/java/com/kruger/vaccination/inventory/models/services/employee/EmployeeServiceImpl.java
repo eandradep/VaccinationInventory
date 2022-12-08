@@ -20,7 +20,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
     @Override
     public Employee findEmployeeByIdentification(String employeeIdentification) {
-        return iEmployeeDAO.findById(employeeIdentification).orElse(null);
+        return iEmployeeDAO.findEmployeeByEmployeeIdentification(employeeIdentification).orElse(null);
     }
 
     @Override

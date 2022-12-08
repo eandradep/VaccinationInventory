@@ -1,7 +1,9 @@
 package com.kruger.vaccination.inventory.models.entity;
 
 
+import com.kruger.vaccination.inventory.models.dto.EmployeeRegisterDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -9,6 +11,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
+@Data
 @Entity
 @Table(name = "employee")
 @Schema(
@@ -19,7 +22,15 @@ import java.io.Serializable;
 public class Employee implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(
+            name = "employeeIdentification",
+            description = "VALOR ÚNICO EN LA BASE DE DATOS, USADO PARA PODER IDENTIFICAR Y DIFERENCIAR UN OBJETO DE OTRO.",
+            example = "1"
+    )
+    private Long employeeId;
+
+
     @Size(min = 10, max = 10)
     @NotEmpty(message = "ESTE CAMPO NO PUEDE CONTENER UN VALOR NULO O EN BLANCO")
     @Column(name = "employee_identification", unique = true, nullable = false)
@@ -71,7 +82,7 @@ public class Employee implements Serializable {
      * @return isValid tomará un valor de true si la cédula del empleado cumple con lo especificado y un valor false
      * si la cédula del empleado cumple no cumple con lo especificado.
      * **/
-    public static boolean employeeIdentificationOnlyNumbers(String employeeIdentification) {
+    private static boolean employeeIdentificationOnlyNumbers(String employeeIdentification) {
         boolean isValid = true;
         if (employeeIdentification.length() == 0) {
             return false;
@@ -94,36 +105,27 @@ public class Employee implements Serializable {
      * @return si la cédula del empleado es correcta, esta retornara un valor boolean true, caso contrario retornará
      * un valor boolean false.
      * **/
-    public static boolean employeeIdentificationValidation(String employeeIdentification) {
-        int suma = 0;
-        if (employeeIdentification.length() == 9) {
-            return false;
-        } else {
-            int[] a = new int[employeeIdentification.length() / 2];
-            int[] b = new int[(employeeIdentification.length() / 2)];
-            int c = 0;
-            int d = 1;
-            for (int i = 0; i < employeeIdentification.length() / 2; i++) {
-                a[i] = Integer.parseInt(String.valueOf(employeeIdentification.charAt(c)));
-                c = c + 2;
-                if (i < (employeeIdentification.length() / 2) - 1) {
-                    b[i] = Integer.parseInt(String.valueOf(employeeIdentification.charAt(d)));
-                    d = d + 2;
+    private static boolean identificationValidation(String employeeIdentification) {
+        int valueSubString;
+        int valueSum = 0;
+        int valueAccum;
+        int valueRest = 0;
+        for (int i = 0; i < employeeIdentification.length() - 1; i++) {
+            valueSubString = Integer.parseInt(employeeIdentification.charAt(i) + "");
+            if (i % 2 == 0) {
+                valueSubString = valueSubString * 2;
+                if (valueSubString > 9) {
+                    valueSubString = valueSubString - 9;
                 }
             }
-            for (int i = 0; i < a.length; i++) {
-                a[i] = a[i] * 2;
-                if (a[i] > 9) {
-                    a[i] = a[i] - 9;
-                }
-                suma = suma + a[i] + b[i];
-            }
-            int aux = suma / 10;
-            int dec = (aux + 1) * 10;
-            if ((dec - suma) == Integer.parseInt(String.valueOf(employeeIdentification.charAt(employeeIdentification.length() - 1))))
-                return true;
-            else return suma % 10 == 0 && employeeIdentification.charAt(employeeIdentification.length() - 1) == '0';
+            valueSum = valueSum + valueSubString;
         }
+        if (valueSum % 10 != 0) {
+            valueAccum = ((valueSum / 10) + 1) * 10;
+            valueRest = valueAccum - valueSum;
+        }
+        int ultimo = Integer.parseInt(employeeIdentification.charAt(9) + "");
+        return ultimo == valueRest;
     }
 
     /***
@@ -133,7 +135,7 @@ public class Employee implements Serializable {
      * @return isValid tomará un valor de true si el nombre o apellido del empleado cumple con lo especificado y un
      * valor false si el nombre o apellido del empleado no cumple con lo especificado.
      * **/
-    public static boolean stringContainsOnlyLetters(String employeeNames) {
+    private static boolean stringContainsOnlyLetters(String employeeNames) {
         boolean isValid = true;
         for (int x = 0; x < employeeNames.length(); x++) {
             char c = employeeNames.charAt(x);
@@ -145,35 +147,11 @@ public class Employee implements Serializable {
         return isValid;
     }
 
-    public String getEmployeeIdentification() {
-        return employeeIdentification;
+    public boolean validateEmployeeDTO(EmployeeRegisterDTO employeeRegisterDTO) {
+        return employeeIdentificationOnlyNumbers(employeeRegisterDTO.getEmployeeIdentification()) &&
+                identificationValidation(employeeRegisterDTO.getEmployeeIdentification()) &&
+                stringContainsOnlyLetters(employeeRegisterDTO.getEmployeeName()) &&
+                stringContainsOnlyLetters(employeeRegisterDTO.getEmployeeLastName());
     }
 
-    public void setEmployeeIdentification(String employeeIdentification) {
-        this.employeeIdentification = employeeIdentification;
-    }
-
-    public String getEmployeeName() {
-        return employeeName;
-    }
-
-    public void setEmployeeName(String employeeName) {
-        this.employeeName = employeeName;
-    }
-
-    public String getEmployeeLastName() {
-        return employeeLastName;
-    }
-
-    public void setEmployeeLastName(String employeeLastName) {
-        this.employeeLastName = employeeLastName;
-    }
-
-    public String getEmployeeEmail() {
-        return employeeEmail;
-    }
-
-    public void setEmployeeEmail(String employeeEmail) {
-        this.employeeEmail = employeeEmail;
-    }
 }

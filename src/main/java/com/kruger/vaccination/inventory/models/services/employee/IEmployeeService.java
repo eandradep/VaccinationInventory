@@ -12,7 +12,7 @@ public interface IEmployeeService {
      * @return retorna el listado de todos los empleados registrados en la base de datos.
      * **/
     @Transactional(readOnly = true)
-    public List<Employee> findAllEmployees();
+    List<Employee> findAllEmployees();
 
     /***
      * Find Employee by Identification
@@ -22,7 +22,7 @@ public interface IEmployeeService {
      * retornará un empleado con todos sus datos, caso contrario la respuesta es null.
      * **/
     @Transactional(readOnly = true)
-    public Employee findEmployeeByIdentification(String employeeIdentification);
+    Employee findEmployeeByIdentification(String employeeIdentification);
 
     /***
      * Save Employee
@@ -30,7 +30,7 @@ public interface IEmployeeService {
      *                 existe en la base de datos, el registro se actualizará, caso contrario se creara uno nuevo.
      * @return retorna el objeto almacenado en base de datos.
      * **/
-    @Transactional(readOnly = false)
-    public Employee saveEmployee(Employee employee);
+    @Transactional()
+    Employee saveEmployee(Employee employee);
 
 }
