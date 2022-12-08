@@ -27,4 +27,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
     public Employee saveEmployee(Employee employee) {
         return iEmployeeDAO.save(employee);
     }
+
+    @Override
+    public void deleteEmployee(Long employeeId) {
+        iEmployeeDAO.deleteById(employeeId);
+    }
 }

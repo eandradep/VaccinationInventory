@@ -33,4 +33,12 @@ public interface IEmployeeService {
     @Transactional()
     Employee saveEmployee(Employee employee);
 
+    /***
+     * Delete Employee
+     * @param employeeId Identificador único del empleado que será usado para poder eliminar los registros de empleado
+     *                   de la base de datos.
+     * **/
+    @Transactional()
+    void deleteEmployee(Long employeeId);
+
 }
