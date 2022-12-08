@@ -10,6 +10,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @Entity
@@ -30,10 +32,9 @@ public class Employee implements Serializable {
     )
     private Long employeeId;
 
-
-    @Size(min = 10, max = 10)
-    @NotEmpty(message = "ESTE CAMPO NO PUEDE CONTENER UN VALOR NULO O EN BLANCO")
     @Column(name = "employee_identification", unique = true, nullable = false)
+    @Size(min = 10, max = 10, message = "EL CAMPO DEBE CONTENER 10 DÍGITOS")
+    @NotEmpty(message = "ESTE CAMPO NO PUEDE CONTENER UN VALOR NULO O EN BLANCO")
     @Schema(
             name = "employeeIdentification",
             description = "CÉDULA DE IDENTIDAD DEL EMPLEADO,  ESTE CAMPO ES USADO COMO IDENTIFICADOR ÚNICO " +
@@ -43,9 +44,9 @@ public class Employee implements Serializable {
     private String employeeIdentification;
 
 
-    @Size(min = 5, max = 25)
     @Column(name = "employee_name", nullable = false)
-    @NotEmpty(message = "ESTE CAMPO NO PUEDE CONTENER UN VALOR NULO O EN BLANCO")
+    @Size(min = 5, max = 25,  message = "El campo debe contener entre 5 y 25 dígitos")
+    @NotEmpty(message = "Este campo no puede contener un valor nulo o en blanco")
     @Schema(
             name = "employeeName",
             description = "NOMBRE DEL NUEVO EMPLEADO, ESTE CAMPO PUEDE CONTENER ENTRE 5 A 25 CARACTERES, " +
@@ -53,10 +54,9 @@ public class Employee implements Serializable {
             example = "EDISON BLADIMIR"
     )
     private String employeeName;
-
-    @Size(min = 5, max = 25)
     @Column(name = "employee_last_name", nullable = false)
-    @NotEmpty(message = "ESTE CAMPO NO PUEDE CONTENER UN VALOR NULO O EN BLANCO")
+    @Size(min = 5, max = 25, message = "El campo debe contener entre 5 y 25 dígitos")
+    @NotEmpty(message = "Este campo no puede contener un valor nulo o en blanco")
     @Schema(
             name = "employeeLastName",
             description = "APELLIDO DEL USUARIO, ESTE CAMPO PUEDE CONTENER ENTRE 5 A 25 CARACTERES, " +
@@ -66,8 +66,8 @@ public class Employee implements Serializable {
     private String employeeLastName;
 
     @Column(name = "employee_email", nullable = false)
-    @Email(message = "DEBE INGRESAR UN CORREO ELECTRÓNICO VALIDO")
-    @NotEmpty(message = "ESTE CAMPO NO PUEDE CONTENER UN VALOR NULO O EN BLANCO")
+    @Email(message = "Debe ingresar un correo electrónico valido")
+    @NotEmpty(message = "Este campo no puede contener un valor nulo o en blanco")
     @Schema(
             name = "employeeEmail",
             description = "APELLIDO DEL USUARIO, ESTE CAMPO PUEDE CONTENER ENTRE 5 A 25 CARACTERES",
@@ -147,11 +147,17 @@ public class Employee implements Serializable {
         return isValid;
     }
 
-    public boolean validateEmployeeDTO(EmployeeRegisterDTO employeeRegisterDTO) {
-        return employeeIdentificationOnlyNumbers(employeeRegisterDTO.getEmployeeIdentification()) &&
-                identificationValidation(employeeRegisterDTO.getEmployeeIdentification()) &&
-                stringContainsOnlyLetters(employeeRegisterDTO.getEmployeeName()) &&
-                stringContainsOnlyLetters(employeeRegisterDTO.getEmployeeLastName());
+    public Map<String, String> validateEmployeeDTO(EmployeeRegisterDTO employeeRegisterDTO) {
+        Map<String, String> errorList = new HashMap<>();
+        if (!employeeIdentificationOnlyNumbers(employeeRegisterDTO.getEmployeeIdentification()))
+            errorList.put("firstPossibility", "La cédula contiene valores no numéricos");
+        if (!identificationValidation(employeeRegisterDTO.getEmployeeIdentification()))
+            errorList.put("secondPossibility", "La cédula es invalida");
+        if (!stringContainsOnlyLetters(employeeRegisterDTO.getEmployeeName()))
+            errorList.put("thirdPossibility", "El nombre de usuario contiene números o caracteres especiales");
+        if (!stringContainsOnlyLetters(employeeRegisterDTO.getEmployeeLastName()))
+            errorList.put("fourthPossibility", "El apellido de usuario contiene números o caracteres especiales");
+        return  errorList;
     }
 
 }

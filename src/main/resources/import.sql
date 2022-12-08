@@ -1,0 +1,1 @@
+INSERT INTO public.employee (employee_email, employee_identification, employee_last_name, employee_name) VALUES ('eandradep@est.ups.edu.ec', '0106126154', 'ANDRADE PRIETO', 'EDISON BLADIMIR');

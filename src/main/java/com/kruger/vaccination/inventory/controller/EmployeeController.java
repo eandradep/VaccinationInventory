@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -36,7 +35,7 @@ import static com.kruger.vaccination.inventory.configuration.StaticValues.*;
 @RequestMapping("/employeeController")
 public class EmployeeController {
 
-    private final Map<String, Object> response = new HashMap<>();
+    private Map<String, Object> response;
     @Autowired
     private IEmployeeService iEmployeeService;
     @Autowired
@@ -87,25 +86,24 @@ public class EmployeeController {
             @Valid @RequestBody EmployeeRegisterDTO employeeRegisterDTO, BindingResult result
     ) {
         Employee employeeToPersist = new Employee();
+        response = new HashMap<>();
         if (result.hasErrors()) {
             response.put(MESSAGE_VALUE, MESSAGE_VALUE_BAD_REQUEST);
             response.put(ERROR_VALUE, iValidationService.validationDTO(result.getFieldErrors()));
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-        if (!employeeToPersist.validateEmployeeDTO(employeeRegisterDTO)) {
+        Map<String, String> responseAux = employeeToPersist.validateEmployeeDTO(employeeRegisterDTO);
+        if (!responseAux.isEmpty()) {
             response.put(MESSAGE_VALUE, MESSAGE_VALUE_BAD_REQUEST);
-            response.put(ERROR_VALUE, iValidationService.employeeValidations());
+            response.put(ERROR_VALUE, responseAux);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         Employee newEmployee;
         employeeToPersist = modelMapper.map(employeeRegisterDTO, Employee.class);
         try {
             newEmployee = iEmployeeService.saveEmployee(employeeToPersist);
-        } catch (DataAccessException dataAccessException) {
-            response.put(MESSAGE_VALUE, MESSAGE_VALUE_INTERNAL_SERVER_ERROR);
-            response.put(ERROR_VALUE,
-                    dataAccessException.getMessage() + " : " + dataAccessException.getMostSpecificCause().getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception exception) {
+            return iValidationService.employeeValidations(exception);
         }
         response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_SAVE);
         response.put(RESPONSE_VALUE, newEmployee);
@@ -144,13 +142,11 @@ public class EmployeeController {
     @GetMapping("/findAllEmployees")
     public ResponseEntity<Map<String, Object>> findAllEmployees() {
         List<Employee> employees;
+        response = new HashMap<>();
         try {
             employees = iEmployeeService.findAllEmployees();
-        } catch (DataAccessException dataAccessException) {
-            response.put(MESSAGE_VALUE, MESSAGE_VALUE_INTERNAL_SERVER_ERROR);
-            response.put(ERROR_VALUE,
-                    dataAccessException.getMessage() + " : " + dataAccessException.getMostSpecificCause().getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception exception) {
+            return iValidationService.employeeValidations(exception);
         }
         if (employees.isEmpty()) {
             response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_NOT_FOUND);
@@ -201,13 +197,11 @@ public class EmployeeController {
             @PathVariable String employeeIdentification
     ) {
         Employee employee;
+        response = new HashMap<>();
         try {
             employee = iEmployeeService.findEmployeeByIdentification(employeeIdentification);
-        } catch (DataAccessException dataAccessException) {
-            response.put(MESSAGE_VALUE, MESSAGE_VALUE_INTERNAL_SERVER_ERROR);
-            response.put(ERROR_VALUE,
-                    dataAccessException.getMessage() + " : " + dataAccessException.getMostSpecificCause().getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception exception) {
+            return iValidationService.employeeValidations(exception);
         }
         if (employee == null) {
             response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_NOT_FOUND);

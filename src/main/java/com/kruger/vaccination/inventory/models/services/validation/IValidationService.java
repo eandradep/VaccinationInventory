@@ -1,5 +1,6 @@
 package com.kruger.vaccination.inventory.models.services.validation;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 
 import java.util.List;
@@ -9,5 +10,5 @@ public interface IValidationService {
 
     Map<String, String> validationDTO(List<FieldError> result);
 
-    Map<String, String> employeeValidations();
+    ResponseEntity<Map<String, Object>> employeeValidations(Exception exception);
 }
