@@ -8,6 +8,7 @@ public class StaticValues {
     public static final String RESPONSE_VALUE = "response";
     //    SUCCESS MESSAGES
     public static final String MESSAGE_VALUE_DATA_FOUND = "Los datos solicitados han sido encontrados en la base de datos.";
+    public static final String MESSAGE_VALUE_DATA_DELETE = "Los datos han sido eliminados de la base de datos correctamente";
     public static final String MESSAGE_VALUE_DATA_SAVE = "La información proporcionada ha sido almacenada correctamente.";
     //    ERRORS MESSAGES
     public static final String MESSAGE_VALUE_INTERNAL_DUPLICATE_KEY = "Error, la cédula del empleado ya esta registrado en el sistema";

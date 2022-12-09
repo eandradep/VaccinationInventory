@@ -19,7 +19,7 @@ public class VaccineServiceImpl implements IVaccineService {
     }
 
     @Override
-    public Vaccine saveVaccineType(Vaccine vaccine) {
+    public Vaccine saveVaccine(Vaccine vaccine) {
         return iVaccineDAO.save(vaccine);
     }
 }

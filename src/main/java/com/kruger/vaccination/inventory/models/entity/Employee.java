@@ -10,6 +10,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,6 +75,25 @@ public class Employee implements Serializable {
             example = "ANDRADE PRIETO"
     )
     private String employeeEmail;
+
+//    DATA TO COMPLETE EMPLOYEE REGISTER
+
+    @Column(name = "employee_birth_date")
+    @Schema(
+            name = "employeeBirthDate",
+            description = "FECHA DE NACIMIENTO DEL EMPLEADO",
+            example = "2022-12-09T03:24:09.479Z"
+    )
+    private Date employeeBirthDate;
+
+    @Column(name = "employee_address")
+    @Size( max = 25, message = "El campo debe contener entre como maximo 25 dígitos")
+    @Schema(
+            name = "employeeAddress",
+            description = "DIRECCION DE DOMICILIO DEL EMPLEADO",
+            example = "2022-12-09T03:24:09.479Z"
+    )
+    private Date employeeAddress;
 
     /***
      * Employee Identification Only Numbers.

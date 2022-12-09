@@ -11,6 +11,6 @@ public interface IVaccineService {
     List<Vaccine> findAll();
 
     @Transactional()
-    Vaccine saveVaccineType(Vaccine vaccine);
+    Vaccine saveVaccine(Vaccine vaccine);
 
 }

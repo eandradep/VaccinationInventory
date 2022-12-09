@@ -35,7 +35,8 @@ import static com.kruger.vaccination.inventory.configuration.StaticValues.*;
 @RequestMapping("/employeeController")
 public class EmployeeController {
 
-
+    @Autowired
+    private IEmployeeService iEmployeeService;
     @Autowired
     private IValidationService iValidationService;
     @Autowired
@@ -66,7 +67,7 @@ public class EmployeeController {
                                     @Content(
                                             mediaType = "application/json",
                                             schema = @Schema(
-                                                    implementation = EmployeeRegisterDTO.class
+                                                    implementation = Employee.class
                                             )
                                     )}
                     ),
@@ -84,7 +85,7 @@ public class EmployeeController {
             @Valid @RequestBody EmployeeRegisterDTO employeeRegisterDTO, BindingResult result
     ) {
         Employee employeeToPersist = new Employee();
-        response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         if (result.hasErrors()) {
             response.put(MESSAGE_VALUE, MESSAGE_VALUE_BAD_REQUEST);
             response.put(ERROR_VALUE, iValidationService.validationDTO(result.getFieldErrors()));
@@ -140,7 +141,7 @@ public class EmployeeController {
     @GetMapping("/findAllEmployees")
     public ResponseEntity<Map<String, Object>> findAllEmployees() {
         List<Employee> employees;
-        response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         try {
             employees = iEmployeeService.findAllEmployees();
         } catch (Exception exception) {
@@ -195,7 +196,7 @@ public class EmployeeController {
             @PathVariable String employeeIdentification
     ) {
         Employee employee;
-        response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         try {
             employee = iEmployeeService.findEmployeeByIdentification(employeeIdentification);
         } catch (Exception exception) {
@@ -209,6 +210,43 @@ public class EmployeeController {
             response.put(RESPONSE_VALUE, employee);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
+    }
+
+    @Operation(
+            summary = "ELIMINAR REGISTRO DE EMPLEADO DE LA BASE DE DATOS",
+            description = "ESTE SERVICIO SE ENCARGA DE ELIMINAR LOS REGISTROS DE UN EMPLEADO DENTRO" +
+                    "DE LA BASE DE DATOS.",
+            parameters = {@Parameter(
+                    name = "employeeID",
+                    description = "IDENTIFICADOR DEL USUARIO",
+                    example = "1",
+                    required = true
+            )},
+            method = "DELETE"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "SI EL OBJETO ES ELIMINADO CORRECTAMENTE"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
+                    )
+            })
+    @DeleteMapping("/deleteEmployee/{employeeID}")
+    public ResponseEntity<Map<String, Object>> findAllEmployeeByIdentification(
+            @PathVariable Long employeeID
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            iEmployeeService.deleteEmployee(employeeID);
+        } catch (Exception exception) {
+            return iValidationService.employeeValidations(exception);
+        }
+        response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_DELETE);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

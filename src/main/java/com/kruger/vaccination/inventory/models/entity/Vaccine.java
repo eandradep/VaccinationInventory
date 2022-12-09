@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "vaccine")
 @Schema(
-        name = "TIPO DE VACUNA",
+        name = "VACUNA",
         description = "ENTIDAD QUE SE MAPEA CONTRA LA BASE DE DATOS, ESTA TABLA ES USADA PARA PODER PERSISTIR LA" +
                 "INFORMACIÓN DE LOS TIPOS DE VACUNA"
 )

@@ -9,6 +9,10 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Data
+@Schema(
+        name = "EMPLEADOS DTO",
+        description = "OBJETO DE TRANSFERENCIA DE DATOS USADO PARA LA PERSISTENCIA DE UN NUEVO EMPLEADO."
+)
 public class EmployeeRegisterDTO implements Serializable {
 
     @Size(min = 10, max = 10, message = "EL CAMPO DEBE CONTENER 10 DÍGITOS")
