@@ -25,6 +25,16 @@ public interface IEmployeeService {
     Employee findEmployeeByIdentification(String employeeIdentification);
 
     /***
+     * Find Employee by Identification
+     * @param employeeId identificador único, con este valor Long se procede a realizar la búsqueda
+     *                               en base de datos.
+     * @return si el identificador del empleado proporcionado coincide con los identificadores registrados en la base de datos,
+     * retornará un empleado con todos sus datos, caso contrario la respuesta es null.
+     * **/
+    @Transactional(readOnly = true)
+    Employee findEmployeeById(Long employeeId);
+
+    /***
      * Save Employee
      * @param employee entidad de empleado que se va a almacenar en la base de datos, si la cédula del usuario ya
      *                 existe en la base de datos, el registro se actualizará, caso contrario se creara uno nuevo.

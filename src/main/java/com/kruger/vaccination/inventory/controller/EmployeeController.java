@@ -1,6 +1,7 @@
 package com.kruger.vaccination.inventory.controller;
 
 import com.kruger.vaccination.inventory.models.dto.EmployeeRegisterDTO;
+import com.kruger.vaccination.inventory.models.dto.EmployeeUpdateDTO;
 import com.kruger.vaccination.inventory.models.entity.Employee;
 import com.kruger.vaccination.inventory.models.services.employee.IEmployeeService;
 import com.kruger.vaccination.inventory.models.services.validation.IValidationService;
@@ -124,7 +125,7 @@ public class EmployeeController {
                                     @Content(
                                             mediaType = "application/json",
                                             schema = @Schema(
-                                                    allOf = EmployeeRegisterDTO.class
+                                                    allOf = Employee.class
                                             )
                                     )}
                     ),
@@ -177,7 +178,7 @@ public class EmployeeController {
                                     @Content(
                                             mediaType = "application/json",
                                             schema = @Schema(
-                                                    allOf = EmployeeRegisterDTO.class
+                                                    implementation = Employee.class
                                             )
                                     )}
                     ),
@@ -249,4 +250,87 @@ public class EmployeeController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "REGISTRAR INFORMACIÓN BÁSICA DE USUARIO",
+            description = "ESTE SERVICIO SE ENCARGA DE PERSISTIR UN NUEVO EMPLEADO EN LA BASE DE DATOS, SEGÚN EL" +
+                    "REQUERIMIENTO SE DEBE PODER REGISTRAR, ACTUALIZAR, LISTAR Y ELIMINAR LOS REGISTROS DE EMPLEADOS",
+            parameters = {@Parameter(
+                    name = "employeeId",
+                    description = "IDENTIFICADOR UNICO DEL EMPLEADO",
+                    example = "1",
+                    required = true
+            ),
+                    @Parameter(
+                    name = "employeeUpdateDTO",
+                    description = "DTO QUE PERMITE ACTUALIZAR LOS DATOS DEL EMPLEADO",
+                    schema = @Schema(
+                            implementation = EmployeeUpdateDTO.class
+                    ),
+                    required = true
+            )},
+            method = "PUT"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "SI EL OBJETO CUMPLE CON LAS VALIDACIONES PREVIAS SERÁ ACTUALIZADO EN LA " +
+                                    "BASE DE DATOS.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(
+                                                    implementation = Employee.class
+                                            )
+                                    )}
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "SI EL OBJETO NO CUMPLE CON LAS VALIDACIONES PREVIAS RETORNARA UN LISTADO"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
+                    )
+            })
+    @PutMapping("/updateEmployeeData/{employeeId}")
+    public ResponseEntity<Map<String, Object>> updateEmployeeData(
+            @Valid @RequestBody EmployeeUpdateDTO employeeUpdateDTO,
+            @PathVariable("employeeId") Long employeeId,
+            BindingResult result
+    ) {
+        Employee updateEmployee = new Employee();
+        Map<String, Object> response = new HashMap<>();
+        if (result.hasErrors()) {
+            response.put(MESSAGE_VALUE, MESSAGE_VALUE_BAD_REQUEST);
+            response.put(ERROR_VALUE, iValidationService.validationDTO(result.getFieldErrors()));
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        Map<String, String> responseAux = updateEmployee.validateEmployeeUpdateDTO(employeeUpdateDTO);
+        if (!responseAux.isEmpty()) {
+            response.put(MESSAGE_VALUE, MESSAGE_VALUE_BAD_REQUEST);
+            response.put(ERROR_VALUE, responseAux);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        Employee currentEmployee = iEmployeeService.findEmployeeById(employeeId);
+        if (currentEmployee == null) {
+            response.put(MESSAGE_VALUE, MESSAGE_VALUE_BAD_REQUEST);
+            response.put(ERROR_VALUE, responseAux);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        updateEmployee = modelMapper.map(employeeUpdateDTO, Employee.class);
+        updateEmployee.setEmployeeId( currentEmployee.getEmployeeId());
+        updateEmployee.setEmployeeIdentification( currentEmployee.getEmployeeIdentification());
+        updateEmployee.setEmployeeEmail( currentEmployee.getEmployeeEmail());
+
+        try {
+            updateEmployee = iEmployeeService.saveEmployee(updateEmployee);
+        } catch (Exception exception) {
+            return iValidationService.employeeValidations(exception);
+        }
+        response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_UPDATE);
+        response.put(RESPONSE_VALUE, updateEmployee);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

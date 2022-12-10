@@ -21,17 +21,18 @@ public class Vaccine implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(
-            name = "employeeIdentification",
+            name = "vaccineId",
             description = "VALOR ÚNICO EN LA BASE DE DATOS, USADO PARA PODER IDENTIFICAR Y DIFERENCIAR UN OBJETO DE OTRO.",
             example = "1"
     )
+    @Column(name = "vaccine_id")
     private Long vaccineId;
 
     @Column(name = "vaccine_name", nullable = false)
     @Size(min = 5, max = 15, message = "El campo debe contener entre 5 y 15 dígitos")
     @NotEmpty(message = "Este campo no puede contener un valor nulo o en blanco")
     @Schema(
-            name = "vaccineTypeName",
+            name = "vaccineName",
             description = "NOMBRE DEL TIPO DE VACUNA.",
             example = "AstraZeneca"
     )

@@ -2,17 +2,18 @@ package com.kruger.vaccination.inventory.models.entity;
 
 
 import com.kruger.vaccination.inventory.models.dto.EmployeeRegisterDTO;
+import com.kruger.vaccination.inventory.models.dto.EmployeeUpdateDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @Entity
@@ -46,7 +47,7 @@ public class Employee implements Serializable {
 
 
     @Column(name = "employee_name", nullable = false)
-    @Size(min = 5, max = 25,  message = "El campo debe contener entre 5 y 25 dígitos")
+    @Size(min = 5, max = 25, message = "El campo debe contener entre 5 y 25 dígitos")
     @NotEmpty(message = "Este campo no puede contener un valor nulo o en blanco")
     @Schema(
             name = "employeeName",
@@ -82,18 +83,49 @@ public class Employee implements Serializable {
     @Schema(
             name = "employeeBirthDate",
             description = "FECHA DE NACIMIENTO DEL EMPLEADO",
-            example = "2022-12-09T03:24:09.479Z"
+            example = "2019-08-14T00:00:00.000Z"
     )
     private Date employeeBirthDate;
 
     @Column(name = "employee_address")
-    @Size( max = 25, message = "El campo debe contener entre como maximo 25 dígitos")
+    @Size(max = 75, message = "El campo debe contener entre como maximo 75 dígitos")
     @Schema(
             name = "employeeAddress",
             description = "DIRECCION DE DOMICILIO DEL EMPLEADO",
-            example = "2022-12-09T03:24:09.479Z"
+            example = "Ricaurte el Arenal"
     )
-    private Date employeeAddress;
+    private String employeeAddress;
+
+    @Column(name = "employee_phone_number")
+    @Size(max = 10, message = "El campo debe contener entre como maximo 10 dígitos")
+    @Schema(
+            name = "employeePhoneNumber",
+            description = "DIRECCION DE DOMICILIO DEL EMPLEADO",
+            example = "0962738743"
+    )
+    private String employeePhoneNumber;
+
+    @Column(name = "employee_is_vaccinate")
+    @Schema(
+            name = "employeeIsVaccinate",
+            description = "DIRECCION DE DOMICILIO DEL EMPLEADO",
+            example = "True"
+    )
+    private Boolean employeeIsVaccinate;
+
+    @OneToMany(
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL
+    )
+    @JoinColumn(
+            name = "employee_id"
+    )
+    @Schema(
+            name = "immunizationRecordList",
+            description = "REGISTRO DE VACUNAS DEL EMPLEADO",
+            allOf = ImmunizationRecord.class
+    )
+    private List<ImmunizationRecord> immunizationRecordList;
 
     /***
      * Employee Identification Only Numbers.
@@ -164,7 +196,7 @@ public class Employee implements Serializable {
                 break;
             }
         }
-        return isValid;
+        return !isValid;
     }
 
     public Map<String, String> validateEmployeeDTO(EmployeeRegisterDTO employeeRegisterDTO) {
@@ -173,11 +205,28 @@ public class Employee implements Serializable {
             errorList.put("firstPossibility", "La cédula contiene valores no numéricos");
         if (!identificationValidation(employeeRegisterDTO.getEmployeeIdentification()))
             errorList.put("secondPossibility", "La cédula es invalida");
-        if (!stringContainsOnlyLetters(employeeRegisterDTO.getEmployeeName()))
+        if (stringContainsOnlyLetters(employeeRegisterDTO.getEmployeeName()))
             errorList.put("thirdPossibility", "El nombre de usuario contiene números o caracteres especiales");
-        if (!stringContainsOnlyLetters(employeeRegisterDTO.getEmployeeLastName()))
+        if (stringContainsOnlyLetters(employeeRegisterDTO.getEmployeeLastName()))
             errorList.put("fourthPossibility", "El apellido de usuario contiene números o caracteres especiales");
-        return  errorList;
+        return errorList;
     }
+
+    /***
+     * Employee Identification Validation.
+     * @param employeeUpdateDTO objeto que contiene todos los valores que se pueden actualizar, este objeto contiene
+     *                          dos valores de interés, el estado de vacunado y el registro de vacunas, para poder
+     *                          proceder con la actualización, se debe validar que el usuario contenga registros de
+     *                          vacunas su el estado del empleado es vacunado.
+     * @return isValid tomará un valor de true si el usuario cumple con la validación previa.
+     * **/
+    public Map<String, String> validateEmployeeUpdateDTO(EmployeeUpdateDTO employeeUpdateDTO) {
+        Map<String, String> errorList = new HashMap<>();
+        if (Boolean.TRUE.equals(employeeUpdateDTO.getEmployeeIsVaccinate()) && employeeUpdateDTO.getImmunizationRecordList().isEmpty()){
+            errorList.put("firstPossibility", "El usuario no puede tener estado vacunado sin tener registro de vacunas.");
+        }
+        return errorList;
+    }
+
 
 }

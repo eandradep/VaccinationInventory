@@ -28,6 +28,7 @@ public class ValidationServiceImpl implements IValidationService {
 
     @Override
     public ResponseEntity<Map<String, Object>> employeeValidations(Exception exception) {
+        exception.printStackTrace();
         Map<String, Object> response = new HashMap<>();
         errorList = new HashMap<>();
         if (exception.getCause().toString().contains("ConstraintViolationException")){

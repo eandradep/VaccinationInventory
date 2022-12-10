@@ -10,6 +10,7 @@ public class StaticValues {
     public static final String MESSAGE_VALUE_DATA_FOUND = "Los datos solicitados han sido encontrados en la base de datos.";
     public static final String MESSAGE_VALUE_DATA_DELETE = "Los datos han sido eliminados de la base de datos correctamente";
     public static final String MESSAGE_VALUE_DATA_SAVE = "La información proporcionada ha sido almacenada correctamente.";
+    public static final String MESSAGE_VALUE_DATA_UPDATE = "La información proporcionada ha sido actualizada correctamente.";
     //    ERRORS MESSAGES
     public static final String MESSAGE_VALUE_INTERNAL_DUPLICATE_KEY = "Error, la cédula del empleado ya esta registrado en el sistema";
     public static final String MESSAGE_VALUE_INTERNAL_SERVER_ERROR = "Error en el servidor, contactar con soporte técnico.";

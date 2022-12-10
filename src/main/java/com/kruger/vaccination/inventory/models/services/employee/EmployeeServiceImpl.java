@@ -24,6 +24,11 @@ public class EmployeeServiceImpl implements IEmployeeService {
     }
 
     @Override
+    public Employee findEmployeeById(Long employeeId) {
+        return iEmployeeDAO.findById(employeeId).orElse(null);
+    }
+
+    @Override
     public Employee saveEmployee(Employee employee) {
         return iEmployeeDAO.save(employee);
     }
