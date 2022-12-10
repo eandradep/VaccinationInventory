@@ -6,6 +6,7 @@ public class StaticValues {
     public static final String MESSAGE_VALUE = "message";
     public static final String ERROR_VALUE = "error";
     public static final String RESPONSE_VALUE = "response";
+    public static final String RESPONSE_VALUE_ACCOUNT = "account";
     //    SUCCESS MESSAGES
     public static final String MESSAGE_VALUE_DATA_FOUND = "Los datos solicitados han sido encontrados en la base de datos.";
     public static final String MESSAGE_VALUE_DATA_DELETE = "Los datos han sido eliminados de la base de datos correctamente";

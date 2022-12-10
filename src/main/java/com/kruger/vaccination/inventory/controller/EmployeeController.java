@@ -4,7 +4,9 @@ import com.kruger.vaccination.inventory.models.dto.DatesFilterDTO;
 import com.kruger.vaccination.inventory.models.dto.EmployeeRegisterDTO;
 import com.kruger.vaccination.inventory.models.dto.EmployeeUpdateDTO;
 import com.kruger.vaccination.inventory.models.entity.Employee;
+import com.kruger.vaccination.inventory.models.entity.UserAccount;
 import com.kruger.vaccination.inventory.models.services.employee.IEmployeeService;
+import com.kruger.vaccination.inventory.models.services.user.IUsuarioService;
 import com.kruger.vaccination.inventory.models.services.validation.IValidationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,11 +14,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.kruger.vaccination.inventory.configuration.StaticValues.*;
+
 
 @Tag(
         name = "CONTROLADOR DE EMPLEADOS",
@@ -41,12 +47,14 @@ public class EmployeeController {
     @Autowired
     private IEmployeeService iEmployeeService;
     @Autowired
+    private IUsuarioService iUsuarioService;
+    @Autowired
     private IValidationService iValidationService;
     @Autowired
     private ModelMapper modelMapper;
 
     @Operation(
-            summary = "REGISTRAR INFORMACIÓN BÁSICA DE USUARIO",
+            summary = "REGISTRAR INFORMACIÓN BÁSICA DE USUARIO {ROLE ADMIN}",
             description = "ESTE SERVICIO SE ENCARGA DE PERSISTIR UN NUEVO EMPLEADO EN LA BASE DE DATOS, SEGÚN EL" +
                     "REQUERIMIENTO SE DEBE PODER REGISTRAR, ACTUALIZAR, LISTAR Y ELIMINAR LOS REGISTROS DE EMPLEADOS",
             parameters = {@Parameter(
@@ -60,6 +68,7 @@ public class EmployeeController {
             )},
             method = "POST"
     )
+    @SecurityRequirement(name = "userAuthorization")
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -83,7 +92,9 @@ public class EmployeeController {
                             description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
                     )
             })
+    @Secured({"ROLE_ADMIN"})
     @PostMapping("/saveEmployee")
+    @Transactional(rollbackFor = {Exception.class} )
     public ResponseEntity<Map<String, Object>> saveEmployee(
             @Valid @RequestBody EmployeeRegisterDTO employeeRegisterDTO, BindingResult result
     ) {
@@ -101,24 +112,29 @@ public class EmployeeController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         Employee newEmployee;
+        UserAccount  userAccount;
         employeeToPersist = modelMapper.map(employeeRegisterDTO, Employee.class);
         employeeToPersist.setEmployeeIsVaccinate(false);
         try {
             newEmployee = iEmployeeService.saveEmployee(employeeToPersist);
+            userAccount = iUsuarioService.saveUserAccount(newEmployee);
         } catch (Exception exception) {
             return iValidationService.employeeValidations(exception);
         }
         response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_SAVE);
         response.put(RESPONSE_VALUE, newEmployee);
+        response.put(RESPONSE_VALUE_ACCOUNT, userAccount);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Secured({"ROLE_ADMIN"})
     @Operation(
-            summary = "LISTAR TODOS LOS EMPLEADOS",
+            summary = "LISTAR TODOS LOS EMPLEADOS {ROLE ADMIN}",
             description = "ESTE SERVICIO SE ENCARGA DE LISTAR TODOS LOS REGISTROS DE EPLEADO QUE SE ENCEUNTREN " +
                     "EN LA BASE DE DATOS.",
             method = "GET"
     )
+    @SecurityRequirement(name = "userAuthorization")
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -162,7 +178,7 @@ public class EmployeeController {
     }
 
     @Operation(
-            summary = "LISTAR EMPLEADOS EN BASE A SU ESTADO DE VACUNACIÓN",
+            summary = "LISTAR EMPLEADOS EN BASE A SU ESTADO DE VACUNACIÓN {ROLE ADMIN}",
             description = "ESTE SERVICIO SE ENCARGA DE LISTAR TODOS LOS REGISTROS DE EMPLEADO QUE SE ENCUENTREN " +
                     "EN LA BASE DE DATOS, SIEMPRE QUE CUMPLAN CON EL ESTADO PROPORCIONADO.",
             method = "GET",
@@ -172,6 +188,7 @@ public class EmployeeController {
                             example = "true")
             }
     )
+    @SecurityRequirement(name = "userAuthorization")
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -195,6 +212,7 @@ public class EmployeeController {
                             description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
                     )
             })
+    @Secured({"ROLE_ADMIN"})
     @GetMapping("/findEmployeesVaccineStatus/{vaccineStatus}")
     public ResponseEntity<Map<String, Object>> findEmployeesVaccineStatus(
             @PathVariable Boolean vaccineStatus) {
@@ -218,8 +236,9 @@ public class EmployeeController {
         }
     }
 
+    @Secured({"ROLE_ADMIN"})
     @Operation(
-            summary = "LISTAR EMPLEADOS EN BASE AL TIPO DE VACUNA",
+            summary = "LISTAR EMPLEADOS EN BASE AL TIPO DE VACUNA {ROLE ADMIN}",
             description = "ESTE SERVICIO SE ENCARGA DE LISTAR TODOS LOS REGISTROS DE EMPLEADO QUE SE ENCUENTREN " +
                     "EN LA BASE DE DATOS, SIEMPRE QUE CUMPLAN CON EL ESTADO PROPORCIONADO.",
             method = "GET",
@@ -229,6 +248,7 @@ public class EmployeeController {
                             example = "1")
             }
     )
+    @SecurityRequirement(name = "userAuthorization")
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -276,7 +296,7 @@ public class EmployeeController {
     }
 
     @Operation(
-            summary = "LISTAR EMPLEADOS EN BASE A LA FECHA DE VACUNACIÓN",
+            summary = "LISTAR EMPLEADOS EN BASE A LA FECHA DE VACUNACIÓN {ROLE ADMIN}",
             description = "ESTE SERVICIO SE ENCARGA DE LISTAR TODOS LOS REGISTROS DE EMPLEADO QUE SE ENCUENTREN " +
                     "EN LA BASE DE DATOS, SIEMPRE QUE CUMPLAN CON EL ESTADO PROPORCIONADO.",
             method = "GET",
@@ -289,6 +309,7 @@ public class EmployeeController {
                     )
             }
     )
+    @SecurityRequirement(name = "userAuthorization")
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -312,6 +333,7 @@ public class EmployeeController {
                             description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
                     )
             })
+    @Secured({"ROLE_ADMIN"})
     @GetMapping("/findAllEmployeesByDates")
     public ResponseEntity<Map<String, Object>> findAllEmployeesByDates(
             @Valid @RequestBody DatesFilterDTO datesFilterDTO) {
@@ -335,8 +357,9 @@ public class EmployeeController {
         }
     }
 
+
     @Operation(
-            summary = "BUSCAR UN EMPLEADO POR SU NUMERO DE CÉDULA",
+            summary = "BUSCAR UN EMPLEADO POR SU NUMERO DE CÉDULA {ROLE ADMIN, ROLE EMPLOYEE}",
             description = "ESTE SERVICIO SE ENCARGA DE BUSCAR UN EMPLEADO POR SU NUMERO DE CÉDULA.",
             parameters = {@Parameter(
                     name = "employeeIdentification",
@@ -346,6 +369,7 @@ public class EmployeeController {
             )},
             method = "GET"
     )
+    @SecurityRequirement(name = "userAuthorization")
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -369,8 +393,9 @@ public class EmployeeController {
                             description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
                     )
             })
-    @GetMapping("/findAllEmployeeByIdentification/{employeeIdentification}")
-    public ResponseEntity<Map<String, Object>> findAllEmployeeByIdentification(
+    @Secured({"ROLE_ADMIN", "ROLE_EMPLOYEE"})
+    @GetMapping("/findEmployeeByIdentification/{employeeIdentification}")
+    public ResponseEntity<Map<String, Object>> findEmployeeByIdentification(
             @PathVariable String employeeIdentification) {
         Employee employee;
         Map<String, Object> response = new HashMap<>();
@@ -390,7 +415,7 @@ public class EmployeeController {
     }
 
     @Operation(
-            summary = "ELIMINAR REGISTRO DE EMPLEADO DE LA BASE DE DATOS",
+            summary = "ELIMINAR REGISTRO DE EMPLEADO DE LA BASE DE DATOS {ROLE ADMIN}",
             description = "ESTE SERVICIO SE ENCARGA DE ELIMINAR LOS REGISTROS DE UN EMPLEADO DENTRO" +
                     "DE LA BASE DE DATOS.",
             parameters = {@Parameter(
@@ -401,6 +426,7 @@ public class EmployeeController {
             )},
             method = "DELETE"
     )
+    @SecurityRequirement(name = "userAuthorization")
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -412,6 +438,7 @@ public class EmployeeController {
                             description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
                     )
             })
+    @Secured({"ROLE_ADMIN"})
     @DeleteMapping("/deleteEmployee/{employeeID}")
     public ResponseEntity<Map<String, Object>> findAllEmployeeByIdentification(
             @PathVariable Long employeeID
@@ -427,7 +454,7 @@ public class EmployeeController {
     }
 
     @Operation(
-            summary = "REGISTRAR INFORMACIÓN BÁSICA DE USUARIO",
+            summary = "REGISTRAR INFORMACIÓN BÁSICA DE USUARIO {ROLE ADMIN, ROLE EMPLOYEE}",
             description = "ESTE SERVICIO SE ENCARGA DE PERSISTIR UN NUEVO EMPLEADO EN LA BASE DE DATOS, SEGÚN EL" +
                     "REQUERIMIENTO SE DEBE PODER REGISTRAR, ACTUALIZAR, LISTAR Y ELIMINAR LOS REGISTROS DE EMPLEADOS",
             parameters = {@Parameter(
@@ -446,6 +473,7 @@ public class EmployeeController {
                     )},
             method = "PUT"
     )
+    @SecurityRequirement(name = "userAuthorization")
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -469,6 +497,7 @@ public class EmployeeController {
                             description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
                     )
             })
+    @Secured({"ROLE_ADMIN", "ROLE_EMPLOYEE"})
     @PutMapping("/updateEmployeeData/{employeeId}")
     public ResponseEntity<Map<String, Object>> updateEmployeeData(
             @Valid @RequestBody EmployeeUpdateDTO employeeUpdateDTO,
@@ -509,4 +538,5 @@ public class EmployeeController {
         response.put(RESPONSE_VALUE, updateEmployee);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }

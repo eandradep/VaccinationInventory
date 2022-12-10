@@ -10,11 +10,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,9 +43,9 @@ public class VaccineController {
     private IValidationService iValidationService;
     @Autowired
     private ModelMapper modelMapper;
-
+    @Secured({"ROLE_ADMIN"})
     @Operation(
-            summary = "REGISTRAR UNA NUEVA VACUNA",
+            summary = "REGISTRAR UNA NUEVA VACUNA {ROLDE ADMIN}",
             description = "ESTE SERVICIO SE ENCARGA DE REGISTRAR UN NUEVO TIPO DE VACUNA EN LA BASE DE DATOS, " +
                     "ÚNICAMENTE SE REQUIERE EL NOMBRE DE LA VACUNA PARA PODER REALIZAR EL REGISTRO.",
             parameters = {@Parameter(
@@ -56,6 +58,7 @@ public class VaccineController {
             )},
             method = "POST"
     )
+    @SecurityRequirement(name = "userAuthorization")
     @ApiResponses(
             value = {
                     @ApiResponse(
