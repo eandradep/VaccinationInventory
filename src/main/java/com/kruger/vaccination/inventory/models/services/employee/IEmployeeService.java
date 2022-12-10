@@ -3,6 +3,7 @@ package com.kruger.vaccination.inventory.models.services.employee;
 import com.kruger.vaccination.inventory.models.entity.Employee;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 public interface IEmployeeService {
@@ -23,6 +24,35 @@ public interface IEmployeeService {
      * **/
     @Transactional(readOnly = true)
     Employee findEmployeeByIdentification(String employeeIdentification);
+
+    /***
+     * Find All Employees
+     * @param vaccineStatus estado de vacuna, filtro usado para obtener la información deseada
+     * @return retorna el listado de todos los empleados registrados en la base de datos que cumplan con la condición
+     * de vacunado.
+     * **/
+    @Transactional(readOnly = true)
+    List<Employee> findAllEmployeesByVaccineStatus(Boolean vaccineStatus);
+
+    /***
+     * Find All Employees
+     * @param vaccineID identificador de la vacuna, filtro usado para obtener la información deseada
+     * @return retorna el listado de todos los empleados registrados en la base de datos que cumplan con la condición
+     * de vacunado.
+     * **/
+    @Transactional(readOnly = true)
+    List<Employee> findAllEmployeesByVaccineType(Long vaccineID);
+
+    /***
+     * Find All Employees
+     * @param startDate fecha inicial desde la que se desea filtrar la información
+     * @param endDate fecha final hasta la que se desea filtrar la información
+     * @return retorna el listado de todos los empleados registrados en la base de datos que cumplan con la condición
+     * de vacunado.
+     * **/
+    @Transactional(readOnly = true)
+    List<Employee> findAllEmployeesByDates(Date startDate, Date endDate);
+
 
     /***
      * Find Employee by Identification

@@ -1,8 +1,6 @@
 package com.kruger.vaccination.inventory.controller;
 
-import com.kruger.vaccination.inventory.models.dto.EmployeeRegisterDTO;
 import com.kruger.vaccination.inventory.models.dto.VaccineRegisterDTO;
-import com.kruger.vaccination.inventory.models.entity.Employee;
 import com.kruger.vaccination.inventory.models.entity.Vaccine;
 import com.kruger.vaccination.inventory.models.services.vaccinetype.IVaccineService;
 import com.kruger.vaccination.inventory.models.services.validation.IValidationService;

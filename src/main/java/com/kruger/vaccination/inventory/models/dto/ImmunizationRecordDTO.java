@@ -1,9 +1,9 @@
 package com.kruger.vaccination.inventory.models.dto;
 
-import com.kruger.vaccination.inventory.models.entity.Vaccine;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -30,6 +30,7 @@ public class ImmunizationRecordDTO implements Serializable {
     )
     private Date vaccinationDate;
 
+    @NotEmpty(message = "Este campo no puede contener un valor nulo o en blanco")
     @Schema(
             name = "dosesNumber",
             description = "NUMERO DE DOSIS APLICADA.",
@@ -37,6 +38,7 @@ public class ImmunizationRecordDTO implements Serializable {
     )
     private int dosesNumber;
 
+    @NotEmpty(message = "Este campo no puede contener un valor nulo o en blanco")
     @Schema(
             name = "vaccine",
             description = "NUMERO DE DOSIS QUE SE HA APLICADO.",

@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Data
 @Schema(
         name = "VACUNA DTO",
-        description = "OBJETO DE TRANSFERENCIA DE DATOS USADO PARA LA PERSISTENCIA DE UNA NUEVA VACUNA."
+        description = "OBJETO DE TRANSFERENCIA DE DATOS USADO PARA LA PERSISTENCIA DE UNA NUEVA VACUNA."  
 )
 public class VaccineRegisterDTO implements Serializable {
 

@@ -1,5 +1,6 @@
 package com.kruger.vaccination.inventory.controller;
 
+import com.kruger.vaccination.inventory.models.dto.DatesFilterDTO;
 import com.kruger.vaccination.inventory.models.dto.EmployeeRegisterDTO;
 import com.kruger.vaccination.inventory.models.dto.EmployeeUpdateDTO;
 import com.kruger.vaccination.inventory.models.entity.Employee;
@@ -23,6 +24,7 @@ import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.kruger.vaccination.inventory.configuration.StaticValues.*;
 
@@ -100,6 +102,7 @@ public class EmployeeController {
         }
         Employee newEmployee;
         employeeToPersist = modelMapper.map(employeeRegisterDTO, Employee.class);
+        employeeToPersist.setEmployeeIsVaccinate(false);
         try {
             newEmployee = iEmployeeService.saveEmployee(employeeToPersist);
         } catch (Exception exception) {
@@ -159,6 +162,180 @@ public class EmployeeController {
     }
 
     @Operation(
+            summary = "LISTAR EMPLEADOS EN BASE A SU ESTADO DE VACUNACIÓN",
+            description = "ESTE SERVICIO SE ENCARGA DE LISTAR TODOS LOS REGISTROS DE EMPLEADO QUE SE ENCUENTREN " +
+                    "EN LA BASE DE DATOS, SIEMPRE QUE CUMPLAN CON EL ESTADO PROPORCIONADO.",
+            method = "GET",
+            parameters = {
+                    @Parameter(name = "vaccineStatus",
+                            description = "BOOLEAN QUE CONTIENE EL ESTADO A FILTRAR.",
+                            example = "true")
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "SI SE ENCUENTRAN REGISTROS EN LA BASE DE DATOS",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(
+                                                    allOf = EmployeeRegisterDTO.class
+                                            )
+                                    )}
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "SI NO SE ENCUENTRAN REGISTROS EN LA BASE DE DATOS, EL SERVICIO RETORNARA EL" +
+                                    "CÓDIGO 404 SIN RESULTADOS"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
+                    )
+            })
+    @GetMapping("/findEmployeesVaccineStatus/{vaccineStatus}")
+    public ResponseEntity<Map<String, Object>> findEmployeesVaccineStatus(
+            @PathVariable Boolean vaccineStatus) {
+        List<Employee> employees;
+        Map<String, Object> response = new HashMap<>();
+        try {
+            employees = iEmployeeService.findAllEmployeesByVaccineStatus(vaccineStatus);
+        } catch (Exception exception) {
+            return iValidationService.employeeValidations(exception);
+        }
+        if (employees.isEmpty()) {
+            response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_NOT_FOUND);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        } else {
+            response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_FOUND);
+            response.put(RESPONSE_VALUE, employees
+                    .stream()
+                    .map(user -> modelMapper.map(user, EmployeeRegisterDTO.class))
+                    .collect(Collectors.toList()));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @Operation(
+            summary = "LISTAR EMPLEADOS EN BASE AL TIPO DE VACUNA",
+            description = "ESTE SERVICIO SE ENCARGA DE LISTAR TODOS LOS REGISTROS DE EMPLEADO QUE SE ENCUENTREN " +
+                    "EN LA BASE DE DATOS, SIEMPRE QUE CUMPLAN CON EL ESTADO PROPORCIONADO.",
+            method = "GET",
+            parameters = {
+                    @Parameter(name = "vaccineId",
+                            description = "VALOR NUMÉRICO QUE REPRESENTA EL IDENTIFICADOR DE UNA VACUNA",
+                            example = "1")
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "SI SE ENCUENTRAN REGISTROS EN LA BASE DE DATOS",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(
+                                                    allOf = EmployeeRegisterDTO.class
+                                            )
+                                    )}
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "SI NO SE ENCUENTRAN REGISTROS EN LA BASE DE DATOS, EL SERVICIO RETORNARA EL" +
+                                    "CÓDIGO 404 SIN RESULTADOS"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
+                    )
+            })
+    @GetMapping("/findAllEmployeesByVaccineType/{vaccineId}")
+    public ResponseEntity<Map<String, Object>> findAllEmployeesByVaccineType(
+            @PathVariable Long vaccineId) {
+        List<Employee> employees;
+        Map<String, Object> response = new HashMap<>();
+        try {
+            employees = iEmployeeService.findAllEmployeesByVaccineType(vaccineId);
+        } catch (Exception exception) {
+            return iValidationService.employeeValidations(exception);
+        }
+        if (employees.isEmpty()) {
+            response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_NOT_FOUND);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        } else {
+            response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_FOUND);
+            response.put(RESPONSE_VALUE, employees
+                    .stream()
+                    .map(user -> modelMapper.map(user, EmployeeRegisterDTO.class))
+                    .collect(Collectors.toList()));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @Operation(
+            summary = "LISTAR EMPLEADOS EN BASE A LA FECHA DE VACUNACIÓN",
+            description = "ESTE SERVICIO SE ENCARGA DE LISTAR TODOS LOS REGISTROS DE EMPLEADO QUE SE ENCUENTREN " +
+                    "EN LA BASE DE DATOS, SIEMPRE QUE CUMPLAN CON EL ESTADO PROPORCIONADO.",
+            method = "GET",
+            parameters = {
+                    @Parameter(name = "datesFilterDTO",
+                            description = "OBJETO QUE PERMITE FILTRAR LOS REGISTROS EN BASE DE DATOS POR FECHAS",
+                            schema = @Schema(
+                                    implementation = DatesFilterDTO.class
+                            )
+                    )
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "SI SE ENCUENTRAN REGISTROS EN LA BASE DE DATOS",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(
+                                                    allOf = EmployeeRegisterDTO.class
+                                            )
+                                    )}
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "SI NO SE ENCUENTRAN REGISTROS EN LA BASE DE DATOS, EL SERVICIO RETORNARA EL" +
+                                    "CÓDIGO 404 SIN RESULTADOS"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "SI EXISTE UN ERROR EN EL SERVIDOR RETORNARA ESTE OBJETO"
+                    )
+            })
+    @GetMapping("/findAllEmployeesByDates")
+    public ResponseEntity<Map<String, Object>> findAllEmployeesByDates(
+            @Valid @RequestBody DatesFilterDTO datesFilterDTO) {
+        List<Employee> employees;
+        Map<String, Object> response = new HashMap<>();
+        try {
+            employees = iEmployeeService.findAllEmployeesByDates(datesFilterDTO.getStartDate(), datesFilterDTO.getEndDate());
+        } catch (Exception exception) {
+            return iValidationService.employeeValidations(exception);
+        }
+        if (employees.isEmpty()) {
+            response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_NOT_FOUND);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        } else {
+            response.put(MESSAGE_VALUE, MESSAGE_VALUE_DATA_FOUND);
+            response.put(RESPONSE_VALUE, employees
+                    .stream().distinct()
+                    .map(user -> modelMapper.map(user, EmployeeRegisterDTO.class))
+                    .collect(Collectors.toList()));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @Operation(
             summary = "BUSCAR UN EMPLEADO POR SU NUMERO DE CÉDULA",
             description = "ESTE SERVICIO SE ENCARGA DE BUSCAR UN EMPLEADO POR SU NUMERO DE CÉDULA.",
             parameters = {@Parameter(
@@ -194,8 +371,7 @@ public class EmployeeController {
             })
     @GetMapping("/findAllEmployeeByIdentification/{employeeIdentification}")
     public ResponseEntity<Map<String, Object>> findAllEmployeeByIdentification(
-            @PathVariable String employeeIdentification
-    ) {
+            @PathVariable String employeeIdentification) {
         Employee employee;
         Map<String, Object> response = new HashMap<>();
         try {
@@ -261,13 +437,13 @@ public class EmployeeController {
                     required = true
             ),
                     @Parameter(
-                    name = "employeeUpdateDTO",
-                    description = "DTO QUE PERMITE ACTUALIZAR LOS DATOS DEL EMPLEADO",
-                    schema = @Schema(
-                            implementation = EmployeeUpdateDTO.class
-                    ),
-                    required = true
-            )},
+                            name = "employeeUpdateDTO",
+                            description = "DTO QUE PERMITE ACTUALIZAR LOS DATOS DEL EMPLEADO",
+                            schema = @Schema(
+                                    implementation = EmployeeUpdateDTO.class
+                            ),
+                            required = true
+                    )},
             method = "PUT"
     )
     @ApiResponses(
@@ -320,9 +496,9 @@ public class EmployeeController {
         }
 
         updateEmployee = modelMapper.map(employeeUpdateDTO, Employee.class);
-        updateEmployee.setEmployeeId( currentEmployee.getEmployeeId());
-        updateEmployee.setEmployeeIdentification( currentEmployee.getEmployeeIdentification());
-        updateEmployee.setEmployeeEmail( currentEmployee.getEmployeeEmail());
+        updateEmployee.setEmployeeId(currentEmployee.getEmployeeId());
+        updateEmployee.setEmployeeIdentification(currentEmployee.getEmployeeIdentification());
+        updateEmployee.setEmployeeEmail(currentEmployee.getEmployeeEmail());
 
         try {
             updateEmployee = iEmployeeService.saveEmployee(updateEmployee);

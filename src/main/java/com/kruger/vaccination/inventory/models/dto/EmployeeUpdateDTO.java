@@ -1,6 +1,5 @@
 package com.kruger.vaccination.inventory.models.dto;
 
-import com.kruger.vaccination.inventory.models.entity.ImmunizationRecord;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -37,7 +36,6 @@ public class EmployeeUpdateDTO implements Serializable {
     )
     private String employeeLastName;
 
-//    @NotEmpty(message = "Este campo no puede contener un valor nulo o en blanco")
     @Schema(
             name = "employeeBirthDate",
             description = "FECHA DE NACIMIENTO DEL EMPLEADO",
@@ -63,7 +61,6 @@ public class EmployeeUpdateDTO implements Serializable {
     )
     private String employeePhoneNumber;
 
-//    @NotEmpty(message = "Este campo no puede contener un valor nulo o en blanco")
     @Schema(
             name = "employeeIsVaccinate",
             description = "ESTADO DE VACUNACION DEL EMPLEADO",

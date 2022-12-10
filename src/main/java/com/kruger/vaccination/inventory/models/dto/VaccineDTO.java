@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 @Data
 @Schema(
-        name = "ACTUALIZAR REGISTRO DE VACUNAS DEL EMPLEADO",
+        name = "OBJETO DTO QUE MUESTRA EL ID DE LA VACUNA EN EL REGISTRO DE EMPLEADO",
         description = "OBJETO DE TRANSFERENCIA DE DATOS USADO PARA LA ACTUALIZAR DE UN EMPLEADO REGISTRADO EN BASE DE DATOS."
 )
 public class VaccineDTO implements Serializable {

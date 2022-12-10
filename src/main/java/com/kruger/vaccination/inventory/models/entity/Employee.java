@@ -5,15 +5,16 @@ import com.kruger.vaccination.inventory.models.dto.EmployeeRegisterDTO;
 import com.kruger.vaccination.inventory.models.dto.EmployeeUpdateDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @Entity
@@ -111,7 +112,7 @@ public class Employee implements Serializable {
             description = "DIRECCION DE DOMICILIO DEL EMPLEADO",
             example = "True"
     )
-    private Boolean employeeIsVaccinate;
+    private Boolean employeeIsVaccinate = false;
 
     @OneToMany(
             fetch = FetchType.EAGER,

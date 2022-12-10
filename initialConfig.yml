@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+#  CONTENEDOR QUE TENDRÁ REGISTRADA NUESTRA BASE DE DATOS, QUE USAREMOS PARA PRUEBAS, ESTA BASE
+#  DE DATOS SE BORRARA Y CREARA CADA VEZ QUE SE RECOMPILE EL PROYECTO.
+  vaccinate_db_test:
+    image: 'postgres:latest'
+    container_name: vaccinate_db_test
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=userAdmin
+      - POSTGRES_PASSWORD=userAdminPassword
+      - POSTGRES_DB=dbVaccinationInventoryDev
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+#    EL PUERTO PARA ACCEDER A ESTA BASE DE DATOS.
+    ports:
+      - "5432:5432"
